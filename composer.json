@@ -3,6 +3,12 @@
     "description": "A Laravel package for key-value settings, supporting user-specific and model-specific configurations.",
     "type": "library",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Robin Khan",
+            "email": "sk118420@gmail.com"
+        }
+    ],
     "keywords": ["laravel", "settings", "configuration", "key-value"],
     "require": {
         "php": "^8.3",

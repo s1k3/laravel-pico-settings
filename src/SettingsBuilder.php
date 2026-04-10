@@ -53,4 +53,14 @@ class SettingsBuilder
     {
         $this->repository->set($key, $value, $this->userId, $this->modelClass);
     }
+
+    /**
+     * Delete one or more keys. Pass null to wipe the entire scope.
+     *
+     * @param  string|array<int,string>|null  $key
+     */
+    public function delete(string|array|null $key = null): void
+    {
+        $this->repository->delete($key, $this->userId, $this->modelClass);
+    }
 }

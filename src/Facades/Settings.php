@@ -11,6 +11,7 @@ use Pico\Settings\SettingsManager;
  * @method static SettingsBuilder model(\Illuminate\Database\Eloquent\Model|string $model)
  * @method static mixed          get(string|array $key, mixed $default = null)
  * @method static void           set(string|array $key, mixed $value = null)
+ * @method static void           delete(string|array|null $key = null)
  *
  * @see SettingsManager
  */

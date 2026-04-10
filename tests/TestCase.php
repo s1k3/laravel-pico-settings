@@ -29,7 +29,6 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-        // Create a minimal users table for foreign key tests.
         $this->app['db']->connection()->getSchemaBuilder()->create('users', function ($table) {
             $table->id();
             $table->string('name');
@@ -38,9 +37,6 @@ abstract class TestCase extends BaseTestCase
     }
 }
 
-/**
- * Minimal User stub for tests.
- */
 class User extends Model
 {
     protected $table = 'users';

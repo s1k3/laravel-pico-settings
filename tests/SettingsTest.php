@@ -1,93 +1,139 @@
 <?php
 
-namespace Pico\Settings\Tests;
-
 use Pico\Settings\Facades\Settings;
+use Pico\Settings\Tests\User;
 
-class SettingsTest extends TestCase
-{
-    public function test_set_and_get_global_value(): void
-    {
-        Settings::set('theme', 'dark');
+// ── get / set ─────────────────────────────────────────────────────────────────
 
-        $this->assertSame('dark', Settings::get('theme'));
-    }
+it('sets and gets a global value', function () {
+    Settings::set('theme', 'dark');
 
-    public function test_get_returns_default_when_missing(): void
-    {
-        $this->assertSame('light', Settings::get('theme', 'light'));
-    }
+    expect(Settings::get('theme'))->toBe('dark');
+});
 
-    public function test_set_and_get_for_user(): void
-    {
-        $user = User::create(['name' => 'Alice']);
+it('returns the default when a key is missing', function () {
+    expect(Settings::get('theme', 'light'))->toBe('light');
+});
 
-        Settings::for($user)->set('locale', 'en');
+it('sets and gets a value for a user', function () {
+    $user = User::create(['name' => 'Alice']);
 
-        $this->assertSame('en', Settings::for($user)->get('locale'));
-    }
+    Settings::for($user)->set('locale', 'en');
 
-    public function test_user_settings_are_isolated(): void
-    {
-        $alice = User::create(['name' => 'Alice']);
-        $bob   = User::create(['name' => 'Bob']);
+    expect(Settings::for($user)->get('locale'))->toBe('en');
+});
 
-        Settings::for($alice)->set('locale', 'en');
-        Settings::for($bob)->set('locale', 'fr');
+it('isolates settings between users', function () {
+    $alice = User::create(['name' => 'Alice']);
+    $bob   = User::create(['name' => 'Bob']);
 
-        $this->assertSame('en', Settings::for($alice)->get('locale'));
-        $this->assertSame('fr', Settings::for($bob)->get('locale'));
-    }
+    Settings::for($alice)->set('locale', 'en');
+    Settings::for($bob)->set('locale', 'fr');
 
-    public function test_set_and_get_multiple_values(): void
-    {
-        $user = User::create(['name' => 'Alice']);
+    expect(Settings::for($alice)->get('locale'))->toBe('en')
+        ->and(Settings::for($bob)->get('locale'))->toBe('fr');
+});
 
-        Settings::for($user)->set(['locale' => 'en', 'timezone' => 'UTC']);
+it('sets and gets multiple values at once', function () {
+    $user = User::create(['name' => 'Alice']);
 
-        $result = Settings::for($user)->get(['locale', 'timezone']);
+    Settings::for($user)->set(['locale' => 'en', 'timezone' => 'UTC']);
 
-        $this->assertSame(['locale' => 'en', 'timezone' => 'UTC'], $result);
-    }
+    expect(Settings::for($user)->get(['locale', 'timezone']))
+        ->toBe(['locale' => 'en', 'timezone' => 'UTC']);
+});
 
-    public function test_get_multiple_missing_keys_uses_default(): void
-    {
-        $result = Settings::get(['a', 'b'], 'fallback');
+it('fills missing keys with the default when getting multiple', function () {
+    expect(Settings::get(['a', 'b'], 'fallback'))
+        ->toBe(['a' => 'fallback', 'b' => 'fallback']);
+});
 
-        $this->assertSame(['a' => 'fallback', 'b' => 'fallback'], $result);
-    }
+it('sets and gets a value scoped to a model', function () {
+    Settings::model(User::class)->set('max_items', '50');
 
-    public function test_set_and_get_with_model_scope(): void
-    {
-        Settings::model(User::class)->set('max_items', '50');
+    expect(Settings::model(User::class)->get('max_items'))->toBe('50');
+});
 
-        $this->assertSame('50', Settings::model(User::class)->get('max_items'));
-    }
+it('keeps user+model scope isolated from other scopes', function () {
+    $user = User::create(['name' => 'Alice']);
 
-    public function test_model_and_user_scope_combined(): void
-    {
-        $user = User::create(['name' => 'Alice']);
+    Settings::for($user)->model(User::class)->set('view', 'grid');
 
-        Settings::for($user)->model(User::class)->set('view', 'grid');
+    expect(Settings::for($user)->model(User::class)->get('view'))->toBe('grid')
+        ->and(Settings::for($user)->get('view'))->toBeNull()
+        ->and(Settings::model(User::class)->get('view'))->toBeNull();
+});
 
-        $this->assertSame('grid', Settings::for($user)->model(User::class)->get('view'));
-        // Different scope should not bleed through.
-        $this->assertNull(Settings::for($user)->get('view'));
-        $this->assertNull(Settings::model(User::class)->get('view'));
-    }
+it('overwrites an existing value', function () {
+    Settings::set('theme', 'dark');
+    Settings::set('theme', 'light');
 
-    public function test_set_overwrites_existing_value(): void
-    {
-        Settings::set('theme', 'dark');
-        Settings::set('theme', 'light');
+    expect(Settings::get('theme'))->toBe('light');
+});
 
-        $this->assertSame('light', Settings::get('theme'));
-    }
+it('works via the settings() helper', function () {
+    settings()->set('key', 'value');
 
-    public function test_helper_function_works(): void
-    {
-        settings()->set('key', 'value');
+    expect(settings()->get('key'))->toBe('value');
+});
 
-        $this->assertSame('value', settings()->get('key'));
-    }
-}
+// ── delete ────────────────────────────────────────────────────────────────────
+
+it('deletes a single key', function () {
+    Settings::set(['theme' => 'dark', 'locale' => 'en']);
+
+    Settings::delete('theme');
+
+    expect(Settings::get('theme'))->toBeNull()
+        ->and(Settings::get('locale'))->toBe('en');
+});
+
+it('deletes multiple keys at once', function () {
+    Settings::set(['a' => '1', 'b' => '2', 'c' => '3']);
+
+    Settings::delete(['a', 'b']);
+
+    expect(Settings::get('a'))->toBeNull()
+        ->and(Settings::get('b'))->toBeNull()
+        ->and(Settings::get('c'))->toBe('3');
+});
+
+it('deletes all keys in a scope when no key is given', function () {
+    Settings::set(['a' => '1', 'b' => '2']);
+
+    Settings::delete();
+
+    expect(Settings::get('a'))->toBeNull()
+        ->and(Settings::get('b'))->toBeNull();
+});
+
+it('deletes a key within a user scope', function () {
+    $user = User::create(['name' => 'Alice']);
+
+    Settings::for($user)->set(['locale' => 'en', 'timezone' => 'UTC']);
+    Settings::for($user)->delete('locale');
+
+    expect(Settings::for($user)->get('locale'))->toBeNull()
+        ->and(Settings::for($user)->get('timezone'))->toBe('UTC');
+});
+
+it('does not affect other scopes when deleting', function () {
+    $user = User::create(['name' => 'Alice']);
+
+    Settings::set('theme', 'dark');
+    Settings::for($user)->set('theme', 'light');
+
+    Settings::for($user)->delete('theme');
+
+    expect(Settings::for($user)->get('theme'))->toBeNull()
+        ->and(Settings::get('theme'))->toBe('dark');
+});
+
+it('deletes within a combined user+model scope', function () {
+    $user = User::create(['name' => 'Alice']);
+
+    Settings::for($user)->model(User::class)->set('view', 'grid');
+    Settings::for($user)->model(User::class)->delete('view');
+
+    expect(Settings::for($user)->model(User::class)->get('view'))->toBeNull();
+});

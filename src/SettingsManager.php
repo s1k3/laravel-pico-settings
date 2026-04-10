@@ -47,4 +47,14 @@ class SettingsManager
     {
         (new SettingsBuilder($this->repository))->set($key, $value);
     }
+
+    /**
+     * Delete one or more global keys. Pass null to wipe all global settings.
+     *
+     * @param  string|array<int,string>|null  $key
+     */
+    public function delete(string|array|null $key = null): void
+    {
+        (new SettingsBuilder($this->repository))->delete($key);
+    }
 }

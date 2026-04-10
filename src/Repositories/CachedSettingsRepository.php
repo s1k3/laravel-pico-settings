@@ -56,6 +56,27 @@ class CachedSettingsRepository implements SettingsRepositoryInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function delete(
+        string|array|null $key,
+        ?int $userId,
+        ?string $model,
+    ): void {
+        $query = Setting::query()
+            ->where('user_id', $userId)
+            ->where('model', $model);
+
+        match (true) {
+            is_null($key)   => $query->delete(),
+            is_array($key)  => $query->whereIn('key', $key)->delete(),
+            default         => $query->where('key', $key)->delete(),
+        };
+
+        $this->rebuildCache($userId, $model);
+    }
+
+    /**
      * Load all settings for a scope, hydrating cache on miss.
      *
      * @return array<string, mixed>

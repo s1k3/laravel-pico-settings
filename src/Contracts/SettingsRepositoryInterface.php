@@ -27,4 +27,16 @@ interface SettingsRepositoryInterface
         ?int $userId,
         ?string $model,
     ): void;
+
+    /**
+     * Delete one or more keys from storage.
+     * Passing null deletes every key in the scope.
+     *
+     * @param  string|array<int,string>|null  $key
+     */
+    public function delete(
+        string|array|null $key,
+        ?int $userId,
+        ?string $model,
+    ): void;
 }

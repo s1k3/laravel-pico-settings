@@ -2,7 +2,7 @@
 
 A lightweight Laravel package for managing key-value settings. Supports global, user-specific, and model-specific scopes with optional JSON file caching.
 
-**Requirements:** PHP 8.3+ · Laravel 11 or 12
+**Requirements:** PHP 8.3+ · Laravel 11 or 12 or 13
 
 ---
 

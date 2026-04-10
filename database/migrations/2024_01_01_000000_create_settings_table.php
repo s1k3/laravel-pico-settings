@@ -16,10 +16,7 @@ return new class extends Migration
             $table->longText('value')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')
-                  ->references('id')
-                  ->on(config('pico-settings.user_table', 'users'))
-                  ->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on(config('pico-settings.user_table', 'users'))->cascadeOnDelete();
 
             $table->unique(['user_id', 'model', 'key']);
         });

@@ -146,6 +146,29 @@ settings()->for($user)->set(['locale' => 'en', 'timezone' => 'UTC']);
 
 ---
 
+### Deleting settings
+
+```php
+// Delete a single key
+Settings::delete('theme');
+
+// Delete multiple keys
+Settings::delete(['theme', 'locale']);
+
+// Delete all keys in the current scope
+Settings::delete();
+
+// Delete within a user scope
+Settings::for($user)->delete('locale');
+
+// Delete within a combined user + model scope
+Settings::for($user)->model(Post::class)->delete('view');
+```
+
+Deleting only affects the targeted scope — other scopes are left untouched.
+
+---
+
 ## Caching
 
 When caching is enabled, settings are stored in JSON files under `storage/app/pico-settings/` (configurable). Each scope gets its own file:
@@ -154,10 +177,18 @@ When caching is enabled, settings are stored in JSON files under `storage/app/pi
 |---|---|
 | Global | `global.json` |
 | User only | `user_1.json` |
-| Model only | `model_Post.json` |
-| User + model | `user_1_model_Post.json` |
+| Model only | `model_posts.json` |
+| User + model | `user_1_model_posts.json` |
 
 On every `set()` call, the database is written first and then the cache file is rebuilt. On the first `get()` after boot (cache miss), the full scope is loaded from DB and written to the cache.
+
+### Clearing the cache
+
+To delete all JSON cache files at once:
+
+```bash
+php artisan pico:clear
+```
 
 To disable caching (e.g. in tests):
 

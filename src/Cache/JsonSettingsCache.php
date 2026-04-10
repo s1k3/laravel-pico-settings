@@ -15,14 +15,10 @@ class JsonSettingsCache
 
     public function isEnabled(): bool
     {
-        return (bool) config('pico-settings.cache.enabled', true);
+        return config('pico-settings.cache.enabled', true);
     }
 
-    /**
-     * Retrieve all cached settings for a given scope.
-     *
-     * @return array<string, mixed>|null  null when cache miss
-     */
+
     public function get(?int $userId, ?string $model): ?array
     {
         if (! $this->isEnabled()) {
@@ -37,14 +33,13 @@ class JsonSettingsCache
 
         $data = json_decode(File::get($path), associative: true);
 
-        return is_array($data) ? $data : null;
+        return match (true) {
+            is_array($data) => $data,
+            default => null,
+        };
     }
 
-    /**
-     * Write all settings for a given scope to the JSON cache.
-     *
-     * @param  array<string, mixed>  $data
-     */
+
     public function put(?int $userId, ?string $model, array $data): void
     {
         if (! $this->isEnabled()) {
@@ -55,9 +50,6 @@ class JsonSettingsCache
         File::put($this->resolvePath($userId, $model), json_encode($data, JSON_PRETTY_PRINT));
     }
 
-    /**
-     * Remove the cache file for a given scope.
-     */
     public function forget(?int $userId, ?string $model): void
     {
         $path = $this->resolvePath($userId, $model);
@@ -69,10 +61,18 @@ class JsonSettingsCache
 
     private function resolvePath(?int $userId, ?string $model): string
     {
+
+        if (! class_exists($model)) {
+            throw new \InvalidArgumentException("Model class [{$model}] does not exist.");
+        }
+
+        $tableName = (new $model)->getTable();
+
+
         $segment = match (true) {
-            $userId !== null && $model !== null => "user_{$userId}_model_".class_basename($model),
+            $userId !== null && $model !== null => "user_{$userId}_model_".$tableName,
             $userId !== null                   => "user_{$userId}",
-            $model !== null                    => 'model_'.class_basename($model),
+            $model !== null                    => 'model_'.$tableName,
             default                            => 'global',
         };
 

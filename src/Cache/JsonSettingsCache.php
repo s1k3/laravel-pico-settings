@@ -62,11 +62,11 @@ class JsonSettingsCache
     private function resolvePath(?int $userId, ?string $model): string
     {
 
-        if (! class_exists($model)) {
+        if ($model !== null && ! class_exists($model)) {
             throw new \InvalidArgumentException("Model class [{$model}] does not exist.");
         }
 
-        $tableName = (new $model)->getTable();
+        $tableName = $model !== null ? (new $model)->getTable() : "";
 
 
         $segment = match (true) {

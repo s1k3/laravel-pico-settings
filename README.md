@@ -66,8 +66,6 @@ use Pico\Settings\Facades\Settings;
 settings()
 ```
 
-Both the facade and helper return the same `SettingsManager` instance and share identical APIs.
-
 ---
 
 ### Global settings
@@ -214,23 +212,3 @@ To disable caching (e.g. in tests):
 | `updated_at` | timestamp | |
 
 A unique constraint is enforced on `(user_id, model, key)`.
-
----
-
-## Testing
-
-```bash
-composer test
-```
-
-or directly:
-
-```bash
-./vendor/bin/phpunit
-```
-
----
-
-## License
-
-MIT

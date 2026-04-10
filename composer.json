@@ -1,0 +1,42 @@
+{
+    "name": "pico/settings",
+    "description": "A Laravel package for key-value settings, supporting user-specific and model-specific configurations.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "settings", "configuration", "key-value"],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/database": "^11.0|^12.0",
+        "illuminate/cache": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pico\\Settings\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pico\\Settings\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pico\\Settings\\SettingsServiceProvider"
+            ],
+            "aliases": {
+                "Settings": "Pico\\Settings\\Facades\\Settings"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

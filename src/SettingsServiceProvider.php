@@ -4,6 +4,7 @@ namespace Pico\Settings;
 
 use Illuminate\Support\ServiceProvider;
 use Pico\Settings\Commands\ClearSettingsCacheCommand;
+use Pico\Settings\Commands\MakeSettingsMigrationCommand;
 use Pico\Settings\Contracts\SettingsRepositoryInterface;
 use Pico\Settings\Repositories\CachedSettingsRepository;
 
@@ -23,17 +24,18 @@ class SettingsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([ClearSettingsCacheCommand::class]);
+            $this->commands([
+                ClearSettingsCacheCommand::class,
+                MakeSettingsMigrationCommand::class,
+            ]);
 
             $this->publishes([
                 __DIR__.'/../config/pico-settings.php' => config_path('pico-settings.php'),
             ], 'pico-settings-config');
 
             $this->publishes([
-                __DIR__.'/../database/migrations/' => database_path('migrations'),
-            ], 'pico-settings-migrations');
+                __DIR__.'/../stubs/create_settings_table.stub' => base_path('stubs/pico-settings/create_settings_table.stub'),
+            ], 'pico-settings-stubs');
         }
-
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 }

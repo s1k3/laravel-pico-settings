@@ -18,14 +18,22 @@ Publish the config file:
 php artisan vendor:publish --tag=pico-settings-config
 ```
 
-Publish and run the migration:
+Generate and run the migration:
 
 ```bash
-php artisan vendor:publish --tag=pico-settings-migrations
+php artisan pico:settings-table-migration
 php artisan migrate
 ```
 
-Or let the package run migrations automatically (they are loaded via `loadMigrationsFrom`).
+This creates a timestamped `create_settings_table` migration in your `database/migrations/` directory.
+
+If you want to customise the stub before generating, publish it first:
+
+```bash
+php artisan vendor:publish --tag=pico-settings-stubs
+```
+
+The stub will be placed at `stubs/pico-settings/create_settings_table.stub` and `pico:settings-table-migration` will use it automatically.
 
 ---
 
